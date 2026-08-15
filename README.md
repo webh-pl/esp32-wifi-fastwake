@@ -32,6 +32,7 @@ Your whole networking code is three calls and one callback:
 
 ```c
 #include "wifi.h"
+#include "secrets.h"   /* WIFI_SSID and WIFI_PMK_HEX — see below */
 
 /* Your traffic (MQTT publish, HTTP POST, ping...). Its result tells the
  * module whether the cached network data still works. */
@@ -76,9 +77,16 @@ The module deliberately does not generate its own traffic — you already send d
 
 The callback is mandatory: without it the module would have no way to notice that a cached IP or gateway MAC went stale. It runs inside `wifi_connect()`, so it must not call any `wifi_*` function itself.
 
-## WiFi password: PMK instead of a passphrase
+## Credentials: secrets.h and the PMK
 
-The module takes the network key as a 64-character hex PMK, not a plain-text passphrase. Deriving a PMK from a passphrase (PBKDF2, 4096 SHA-1 rounds) is expensive, and with the driver's flash storage disabled the device would silently redo it on every single boot. Compute it once on your computer instead:
+`WIFI_SSID` and `WIFI_PMK_HEX` are your application's business — the module only receives them as `wifi_init()` arguments. The usual pattern is a small header kept out of version control. This repo ships a template, [`secrets.h.example`](secrets.h.example):
+
+```bash
+cp managed_components/esp32-wifi-fastwake/secrets.h.example main/secrets.h
+echo "main/secrets.h" >> .gitignore   # never commit real credentials
+```
+
+The module takes the network key as a 64-character hex PMK, not a plain-text passphrase. Deriving a PMK from a passphrase (PBKDF2, 4096 SHA-1 rounds) is expensive, and with the driver's flash storage disabled the device would silently redo it on every single boot. Compute it once on your computer instead, for this exact SSID:
 
 ```bash
 python3 -c 'import hashlib;print(hashlib.pbkdf2_hmac("sha1",b"PASSPHRASE",b"SSID",4096,32).hex())'

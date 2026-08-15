@@ -32,6 +32,7 @@ Cały kod sieciowy aplikacji to trzy wywołania i jeden callback:
 
 ```c
 #include "wifi.h"
+#include "secrets.h"   /* WIFI_SSID i WIFI_PMK_HEX — patrz niżej */
 
 /* Twój ruch (publikacja MQTT, HTTP POST, ping...). Jego wynik mówi modułowi,
  * czy zapamiętane dane sieci nadal działają. */
@@ -76,9 +77,16 @@ Moduł celowo nie generuje własnego ruchu — i tak wysyłasz dane w każdym cy
 
 Callback jest obowiązkowy: bez niego moduł nie miałby jak zauważyć, że zapamiętany adres IP albo MAC bramy się zestarzały. Działa wewnątrz `wifi_connect()`, więc sam nie może wołać żadnej funkcji `wifi_*`.
 
-## Hasło WiFi: PMK zamiast passphrase
+## Dane dostępowe: secrets.h i PMK
 
-Moduł przyjmuje klucz sieci jako 64-znakowy PMK w hex, nie jako zwykłe hasło. Wyliczenie PMK z hasła (PBKDF2, 4096 rund SHA-1) jest kosztowne, a przy wyłączonym zapisie sterownika do flasha urządzenie powtarzałoby je po cichu przy każdym starcie. Policz go raz na komputerze:
+`WIFI_SSID` i `WIFI_PMK_HEX` to sprawa Twojej aplikacji — moduł dostaje je tylko jako argumenty `wifi_init()`. Zwyczajowy wzorzec to mały nagłówek trzymany poza kontrolą wersji. Repo zawiera szablon, [`secrets.h.example`](secrets.h.example):
+
+```bash
+cp managed_components/esp32-wifi-fastwake/secrets.h.example main/secrets.h
+echo "main/secrets.h" >> .gitignore   # nigdy nie commituj prawdziwych danych
+```
+
+Moduł przyjmuje klucz sieci jako 64-znakowy PMK w hex, nie jako zwykłe hasło. Wyliczenie PMK z hasła (PBKDF2, 4096 rund SHA-1) jest kosztowne, a przy wyłączonym zapisie sterownika do flasha urządzenie powtarzałoby je po cichu przy każdym starcie. Policz go raz na komputerze, dla tego konkretnego SSID:
 
 ```bash
 python3 -c 'import hashlib;print(hashlib.pbkdf2_hmac("sha1",b"HASLO",b"SSID",4096,32).hex())'
