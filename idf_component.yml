@@ -1,7 +1,7 @@
 version: "1.0.0"
 description: Fast ESP32 STA WiFi for short battery sessions (LP SRAM cache, ARP, SNTP)
-url: https://github.com/webh-pl/esp32-wifi-sta
-issues: https://github.com/webh-pl/esp32-wifi-sta/issues
+url: https://github.com/webh-pl/esp32-wifi-fastwake
+issues: https://github.com/webh-pl/esp32-wifi-fastwake/issues
 license: MIT
 targets:
   - esp32c5
