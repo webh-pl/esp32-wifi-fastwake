@@ -100,15 +100,13 @@ dependencies:
     version: v1.0.0
 ```
 
-For local development next to the consumer:
+For a local checkout sitting next to the consumer project (`path` is relative to `main/`):
 
 ```yaml
 dependencies:
   idf: ">=6.0"
   esp32-wifi-sta:
-    git: https://github.com/webh-pl/esp32-wifi-sta.git
-    version: v1.0.0
-    override_path: ../../esp32-wifi-sta
+    path: ../../esp32-wifi-sta
 ```
 
 Then `#include "wifi.h"`.
