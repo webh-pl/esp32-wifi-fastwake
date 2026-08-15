@@ -7,6 +7,3 @@ targets:
   - esp32c5
 dependencies:
   idf: ">=6.0"
-files:
-  exclude:
-    - ".cursor/**"
