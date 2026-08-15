@@ -108,7 +108,7 @@ dependencies:
   esp32-wifi-sta:
     git: https://github.com/webh-pl/esp32-wifi-sta.git
     version: v1.0.0
-    override_path: ../esp32-wifi-sta
+    override_path: ../../esp32-wifi-sta
 ```
 
 Then `#include "wifi.h"`.
