@@ -44,7 +44,7 @@ static const char *TAG = "wifi_sta";
 #define WIFI_GOT_IP_BIT          BIT1
 #define WIFI_DISCONNECTED_BIT    BIT2
 
-#define WIFI_CONNECT_TIMEOUT_MS  5000
+#define WIFI_CONNECT_TIMEOUT_MS  6000
 #define WIFI_DISCONNECT_TIMEOUT_MS 2000
 #define WIFI_STALE_RETRY_DELAY_MS  100
 #define WIFI_FIRST_TRAFFIC_DELAY_MS 20
@@ -848,6 +848,12 @@ static wifi_attempt_result_t wifi_attempt(void)
     if (s_ip_ready) {
         /* netif validates the static address when the link comes up */
         result.err = esp_netif_set_ip_info(s_netif, &s_ip_info);
+        if (result.err != ESP_OK) {
+            return result;
+        }
+        /* esp_netif_set_ip_info() on a netif with stopped DHCP clears the
+         * global lwIP DNS servers (dns_clear_servers); put ours back. */
+        result.err = wifi_apply_dns();
         if (result.err != ESP_OK) {
             return result;
         }
