@@ -145,6 +145,8 @@ static bool s_last_rssi_valid;
 static uint32_t s_profile_hash;
 static uint8_t s_last_reason;
 static int8_t s_last_rssi;
+static bool s_conn_rssi_valid;
+static int8_t s_conn_rssi;
 static char s_ssid[33];
 static char s_pmk_hex[65];
 static wifi_cache_t s_cache;
@@ -1109,6 +1111,8 @@ esp_err_t wifi_connect(void)
     const int64_t t_entry_us = esp_timer_get_time();
     char rssi_txt[16];
 
+    s_conn_rssi_valid = false;
+
     if (s_force_full) {
         esp_err_t reset = wifi_enter_full_path();
         s_hints_pending = false;
@@ -1173,6 +1177,10 @@ esp_err_t wifi_connect(void)
     wifi_ap_record_t ap = {0};
     bool have_ap = (esp_wifi_sta_get_ap_info(&ap) == ESP_OK);
     bool have_rssi = have_ap && ap.rssi < 0 && ap.rssi != INT8_MIN;
+    if (have_rssi) {
+        s_conn_rssi = ap.rssi;
+        s_conn_rssi_valid = true;
+    }
     if (have_ap && !s_use_cache) {
         wifi_store_cache(&ap);
     }
@@ -1201,6 +1209,18 @@ esp_err_t wifi_connect(void)
         return ESP_OK;
     }
     wifi_repair_after_link_check();
+    return ESP_OK;
+}
+
+esp_err_t wifi_get_rssi(int8_t *out_rssi)
+{
+    if (out_rssi == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    if (s_state != WIFI_STATE_READY || !s_conn_rssi_valid) {
+        return ESP_ERR_INVALID_STATE;
+    }
+    *out_rssi = s_conn_rssi;
     return ESP_OK;
 }
 

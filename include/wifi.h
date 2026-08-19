@@ -28,6 +28,8 @@ typedef enum {
 /**
  * Application traffic check called from inside wifi_connect(). Must not call
  * any public wifi_* function: the module is neither reentrant nor mutexed.
+ * The only exception is wifi_get_rssi(), which merely reads a snapshot taken
+ * before the check runs.
  */
 typedef wifi_link_result_t (*wifi_link_check_fn)(void);
 
@@ -89,6 +91,16 @@ esp_err_t wifi_disconnect(void);
  * path, which is exactly when the cycle paid for a DHCP round.
  */
 esp_err_t wifi_get_debug_state(wifi_debug_state_t *out);
+
+/**
+ * RSSI (dBm) measured right after the last successful wifi_connect()
+ * association. Read-only snapshot taken before link_check runs, so it is
+ * safe to call from inside the link_check callback: it touches neither
+ * module state nor the driver. Returns ESP_ERR_INVALID_STATE when the
+ * module is not initialized or the current connection produced no valid
+ * measurement.
+ */
+esp_err_t wifi_get_rssi(int8_t *out_rssi);
 
 #ifdef __cplusplus
 }
