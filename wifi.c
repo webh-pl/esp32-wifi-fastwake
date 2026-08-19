@@ -718,6 +718,14 @@ esp_err_t wifi_init(const char *ssid, const char *pmk_hex,
     }
     wifi_started = true;
 
+    /* set_protocols(ghz_5g = 0) leaves the 5 GHz band enabled: without this
+     * the full-path scan sweeps 5 GHz too (passive dwell on DFS channels).
+     * The API needs a started driver, hence after esp_wifi_start(). */
+    err = esp_wifi_set_band_mode(WIFI_BAND_MODE_2G_ONLY);
+    if (err != ESP_OK) {
+        goto fail;
+    }
+
     if (s_use_cache) {
         err = wifi_apply_cached_ip();
         if (err != ESP_OK) {
